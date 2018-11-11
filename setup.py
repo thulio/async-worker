@@ -22,6 +22,7 @@ setup(
     install_requires = [
         "easyqueue==1.2.1-rc1",
         "simple-json-logger==0.2.3",
+        "aiohttp>=3.0.0"
     ],
     entry_points={},
 )
