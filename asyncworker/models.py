@@ -1,8 +1,7 @@
 from collections import UserDict
 from typing import Callable, Coroutine, Dict
 
-from yarl import cached_property
-
+from cached_property import cached_property
 
 Route = Callable[[], Coroutine]
 
