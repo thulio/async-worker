@@ -39,3 +39,15 @@ class BaseApp:
         Should be called in the event loop along with the request handler.
         """
         await self._on_startup.send(self)
+
+    def http_route(self, method: str, path: str, **kwargs):
+        def wrap(f):
+            self.routes_registry[f] = {
+                'type': 'http',
+                'method': method,
+                'path': path,
+                'handler': f,
+                **kwargs
+            }
+            return f
+        return wrap
