@@ -27,13 +27,11 @@ class SSEApplication(BaseApp):
         self.logger = logger
 
     def _build_consumers(self):
-        pass
-        consumers = []
         for _handler, route_info in self.routes_registry.items():
             for route in route_info['routes']:
                 final_url = urljoin(self.url, route)
-                consumers.append(SSEConsumer(route_info, final_url, self.user, self.password))
-        return consumers
+                self.consumers.append(SSEConsumer(route_info, final_url, self.user, self.password))
+        return self.consumers
 
     def route(self, routes, headers={}, options={}):
         def wrap(f):
