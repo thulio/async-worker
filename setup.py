@@ -18,7 +18,7 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
     ],
-    packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
+    packages=find_packages(exclude=['contrib', 'docs', 'tests*', 'examples*']),
     install_requires = [
         "easyqueue==1.2.1-rc1",
         "simple-json-logger==0.2.3",
