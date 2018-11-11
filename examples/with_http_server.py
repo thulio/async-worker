@@ -55,7 +55,7 @@ if HEALTHCHECKER_ENABLED:
             return False
 
 
-@app.route(["words_to_index"], vhost="/", options={Options.BULK_SIZE: 512})
+@app.route(["words_to_index"], vhost="/", options={Options.BULK_SIZE: 1})
 async def drain_handler(messages: List[RabbitMQMessage]):
     print(messages)
 
