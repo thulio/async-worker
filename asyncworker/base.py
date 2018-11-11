@@ -18,6 +18,9 @@ class BaseApp:
         self.routes_registry: Routes[Route, Dict] = Routes()
 
         self._on_startup = Signal(self)
+        if settings.HTTP_ENABLED:
+            http_server = HTTPServer()
+            self._on_startup.append(http_server.startup)
 
     def _build_consumers(self):
         raise NotImplementedError()
