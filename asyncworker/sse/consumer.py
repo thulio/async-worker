@@ -25,9 +25,6 @@ EVENT_DATA_PREFIX = b"data:"
 EVENT_FIELD_SEPARATOR = b":"
 
 
-timeout = ClientTimeout(sock_read=5)
-
-
 class SSEConsumer:
     interval = 10
 
@@ -36,9 +33,12 @@ class SSEConsumer:
                  url: str,
                  username: str,
                  password: str,
+                 session: ClientSession=None,
                  bucket_class: Type[Bucket]=Bucket) -> None:
         self.url = url
-        self.session = ClientSession(timeout=timeout)
+        if session is None:
+            session = ClientSession()
+        self.session = session
         self.bucket = bucket_class(size=route_info['options']['bulk_size'])
         self.route_info = route_info
         self._handler = route_info['handler']

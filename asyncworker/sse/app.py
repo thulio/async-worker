@@ -2,8 +2,9 @@ from typing import Dict, Callable
 from urllib.parse import urljoin
 
 
-from asyncworker import BaseApp
+from asyncworker import BaseApp, HTTPServer
 from asyncworker.options import Options, Defaultvalues
+from asyncworker.signal_handlers.sse import SSE
 from asyncworker.sse.consumer import SSEConsumer
 
 
@@ -13,6 +14,8 @@ SSE_DEFAULT_HEADERS = {
 
 
 class SSEApplication(BaseApp):
+    handlers = (SSE(), HTTPServer())
+
     def __init__(self,
                  url: str,
                  logger,
@@ -25,13 +28,6 @@ class SSEApplication(BaseApp):
         self.password = password
         self.headers = headers
         self.logger = logger
-
-    def _build_consumers(self):
-        for _handler, route_info in self.routes_registry.items():
-            for route in route_info['routes']:
-                final_url = urljoin(self.url, route)
-                self.consumers.append(SSEConsumer(route_info, final_url, self.user, self.password))
-        return self.consumers
 
     def route(self, routes, headers={}, options={}):
         def wrap(f):
