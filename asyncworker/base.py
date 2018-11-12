@@ -1,49 +1,49 @@
 import asyncio
-from typing import Optional, Dict
+from aiohttp import Signal
 
-from aiohttp import web, Signal
-
-from asyncworker.conf import settings, logger
-from asyncworker.http_server import HTTPServer
-from asyncworker.models import Routes, Route
+from asyncworker.conf import logger
+from asyncworker.signal_handlers.http_server import HTTPServer
+from asyncworker.models import Routes
 from asyncworker.utils import entrypoint
 
 
 class BaseApp:
-    http_app: Optional[web.Application]
-    http_runner: Optional[web.AppRunner]
+    handlers = (HTTPServer(),)
 
     def __init__(self) -> None:
         self.loop = asyncio.get_event_loop()
-        self.routes_registry: Routes[Route, Dict] = Routes()
+        self.routes_registry = Routes()
+        self.consumers = []
 
         self._on_startup = Signal(self)
-        if settings.HTTP_ENABLED:
-            http_server = HTTPServer()
-            self._on_startup.append(http_server.startup)
+        self._on_shutdown = Signal(self)
+
+        for handler in self.handlers:
+            if handler.is_enabled:
+                self._on_startup.append(handler.startup)
+                self._on_shutdown.append(handler.shutdown)
 
     def _build_consumers(self):
         raise NotImplementedError()
 
     @entrypoint
-    async def run(self) -> None:
+    async def run(self):
         logger.info("Booting App...")
         self._on_startup.freeze()
+        self._on_shutdown.freeze()
         await self.startup()
-        consumers = self._build_consumers()
-        for consumer in consumers:
-            self.loop.create_task(consumer.start())
+
         while True:
             await asyncio.sleep(10)
 
-    async def startup(self) -> None:
+    async def startup(self):
         """Causes on_startup signal
 
         Should be called in the event loop along with the request handler.
         """
         await self._on_startup.send(self)
 
-    def http_route(self, method: str, path: str, **kwargs):
+    def http_route(self, method, path, **kwargs):
         def wrap(f):
             self.routes_registry[f] = {
                 'type': 'http',
